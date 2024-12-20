@@ -15,32 +15,6 @@ const enum ProcessStatus {
     ERROR,
 };
 
-// const heartbeat = async (clientID: string) => {
-//     const { data: data } = await getData(`${HOST}/users/heartbeat`, {
-//         params: { client_id: clientID },
-//     });
-//     console.log('hb', data, clientID);
-//     if (data.success) return data.status;
-//     else return 6;
-// };
-
-// const deleteUser = async (clientID: string) => {
-//     const { data: data } = await axios.get(`${HOST}/users/deleteuser`, {
-//         params: { client_id: clientID },
-//     });
-//     if (data.success) return data.status;
-//     else return -1;
-// };
-
-// const addUser = async (clientID: string) => {
-//     const { data: data } = await axios.get(`${HOST}/users/adduser`, {
-//         params: { client_id: clientID },
-//     });
-//     console.log('add', clientID);
-//     if (data.success) return 1;
-//     else return -1;
-// };
-
 const getProjectList = async () => {
     const res = await getData<ProjectListItem[]>(`/data/getlist`);
     if (res.success) {
