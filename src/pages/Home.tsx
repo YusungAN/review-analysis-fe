@@ -83,6 +83,7 @@ const Home = () => {
                             brand.naver.com)
                         </SmallList>
                         <SmallList>링크가 'https://'로 시작하도록 해주세요</SmallList>
+                        <SmallList>현재 여러 사정으로 새로운 상품을 분석하기는 어렵습니다.(네이버 쇼핑 크롤링 방지 방안 강화/상세 path 변경/현재 AI 모델을 서빙할 수준의 서버 구축 어려움)</SmallList>
                     </ul>
                     <WhiteContainer>
                         <LinkInput onChange={onChangeUrl} value={url} placeholder="링크 입력" />
@@ -221,7 +222,9 @@ const Home = () => {
                                     ? '링크를 입력하세요'
                                     : loadingStatus === LOAD_CHECK.LOADING
                                     ? '로딩중...'
-                                    : '링크에서 정보를 불러올 수 없습니다.'}
+                                    : <>
+                                    <div>링크에서 정보를 불러올 수 없습니다.</div>
+                                    </>}
                             </Loading>
                         )}
                     </WhiteContainer>
@@ -267,7 +270,7 @@ const PaddingUL = styled.ul`
 
 const WhiteContainer = styled.div`
     width: calc(100% - 50px);
-    height: 650px;
+    height: 70vh;
     background-color: white;
     border-radius: 20px;
     box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
@@ -371,9 +374,9 @@ const WordContainer = styled.div<{chosen: boolean}>`
 
 const Loading = styled.div`
     width: 100%;
-    height: 500px;
+    height: 40vh;
     text-align: center;
-    line-height: 500px;
+    line-height: 40vh;
     font-size: 1.7rem;
     color: rgba(0, 0, 0, 0.3);
 `;

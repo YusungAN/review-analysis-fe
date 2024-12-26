@@ -2,8 +2,8 @@ import axios, {AxiosRequestConfig} from 'axios';
 import { getData, postData } from '.';
 import { OriginalReview, ProductAnalysisInfo, ProductPreview, ProjectListItem } from '../model/commonResponse';
 
-const HOST = 'http://localhost:8000';
-// const HOST = 'http://20.39.194.161';
+// const HOST = 'http://localhost:8000';
+const HOST = 'https://review-analysis-back-polished-star-6700.fly.dev';
 
 const enum ProcessStatus {
     BEFORE_START,
@@ -47,7 +47,7 @@ const getOriginalReview = async (productID: string, word: string) => {
 };
 
 const getWordTrend = async (productID: number, word: string) => {
-    const { data: data } = await getData(`${HOST}/data/getwordtrend`, {
+    const { data: data } = await getData(`/data/getwordtrend`, {
         params: { product_id: productID, word: word },
     });
 
@@ -61,7 +61,6 @@ const startAnalysis = async (url: string, project_name: string, product_name: st
         product_name: product_name,
         category: category,
     });
-
     return res;
 };
 

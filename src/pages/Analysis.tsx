@@ -25,6 +25,7 @@ const Analysis = () => {
     const handleGetAnalysusResult = async () => {
         try {
             const data = await getAnalysisResult(params.productid!);
+
             setProductName(data.p_data.product_name);
             setFilename(data.p_data.csvname);
             setPros(data.p_data.pros);

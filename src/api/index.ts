@@ -2,7 +2,7 @@ import axios, { Axios, AxiosRequestConfig } from 'axios';
 import { APIResponse } from '../model/commonResponse';
 
 const client: Axios = axios.create({
-    baseURL: 'http://localhost:8000',
+    baseURL: 'https://review-analysis-back-polished-star-6700.fly.dev',
     headers: {
         'Content-Type': 'application/json',
     }
