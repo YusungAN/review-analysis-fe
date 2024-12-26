@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import styled from 'styled-components';
 import NavBar from '../components/NavBar';
-import { startAnalysis, ProcessStatus, crawlProductBasicInfo } from '../api/api.ts';
-import { ProductAnalysisInfo, ProductPreview } from '../model/commonResponse.ts';
+import { startAnalysis, crawlProductBasicInfo } from '../api/api.ts';
+import { ProductPreview } from '../model/commonResponse.ts';
 
 const enum LOAD_CHECK {
     INIT,
@@ -185,36 +185,11 @@ const Home = () => {
                                     )}
                                 </div>
                                 <StartBtn
-                                    available={true}//{loadingStatus == processStatus.BEFORE_START}
+                                    available={true}
                                     onClick={handleStartAnalysis}
                                 >
                                     시작하기
                                 </StartBtn>
-                                {/*<ProgressWrapper available={status != processStatus.BEFORE_START}>
-                                    <LinearProgress variant="determinate" value={status * 20} />
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            marginTop: '10px',
-                                        }}
-                                    >
-                                        <div style={{ marginRight: '15px' }}>
-                                            {messages[status - 1]}
-                                        </div>
-                                        <div
-                                            style={{
-                                                display:
-                                                    status == processStatus.END ||
-                                                    status == processStatus.ERROR
-                                                        ? 'none'
-                                                        : 'block',
-                                            }}
-                                        >
-                                            <CircularProgress color="secondary" />
-                                        </div>
-                                    </div>
-                                        </ProgressWrapper>*/}
                             </ProductInfoWrapper>
                         ) : (
                             <Loading>
@@ -264,9 +239,6 @@ const SmallText = styled.div`
     margin-top: 10px;
 `;
 
-const PaddingUL = styled.ul`
-    margin-left: 5%;
-`;
 
 const WhiteContainer = styled.div`
     width: calc(100% - 50px);
@@ -325,15 +297,6 @@ const StartBtn = styled.button<{available: boolean}>`
     border-radius: 10px;
     font-size: 1.2rem;
     margin-bottom: 20px;
-`;
-
-const ProgressWrapper = styled.div<{available: boolean}>`
-    display: ${(props) => (props.available ? 'block' : 'none')};
-    width: calc(100% - 60px);
-    margin-top: 30px;
-    margin-left: 30px;
-    font-size: 1.2rem;
-    font-weight: bold;
 `;
 
 const ProductInfoWrapper = styled.div<{available: boolean}>`

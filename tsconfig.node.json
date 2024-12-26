@@ -5,6 +5,8 @@
     "lib": ["ES2023"],
     "module": "ESNext",
     "skipLibCheck": true,
+    
+    "composite": true,
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -12,13 +14,14 @@
     "isolatedModules": true,
     "moduleDetection": "force",
     "noEmit": true,
+    // "emitDeclarationOnly": true,
 
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
   },
   "include": ["vite.config.ts"]
 }

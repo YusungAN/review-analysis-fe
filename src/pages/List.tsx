@@ -9,7 +9,7 @@ import { useProcessStore } from '../util/store.ts';
 
 const List = () => {
 
-    const { status, update, reset } = useProcessStore();
+    const { status, update } = useProcessStore();
 
     const [projectList, setProjectList] = useState<ProjectListItem[]>([]);
     const [updateSec, setUpdateSec] = useState<number>(0);

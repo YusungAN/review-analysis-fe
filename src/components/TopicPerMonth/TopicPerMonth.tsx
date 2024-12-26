@@ -2,8 +2,8 @@ import styled from 'styled-components';
 
 interface TopicPerMonthProps {
     month: string, 
-    topicObj, 
-    onChange, 
+    topicObj: {[month: string]: string[]}; 
+    onChange: (word: string, topic: number, month: string) => void, 
     chosenWord: string, 
     chosenTopic: number, 
     chosenMonth: string

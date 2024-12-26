@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import TopicPerMonth from '../TopicPerMonth';
 import ArrowIcon from '../../assets/next.svg?react';
-import { getOriginalReview, getWordTrend } from '../../api/api';
-import { DTMItemMonth, OriginalReview } from '../../model/commonResponse';
+import { getOriginalReview } from '../../api/api';
+import { DTMItemMonth } from '../../model/commonResponse';
 
 interface ShowDTMProps {
     productID: string,
@@ -22,7 +22,6 @@ const ShowDTM = (props: ShowDTMProps) => {
     const [nowSentPage, setNowSentPage] = useState<number>(0);
     const [timestampIdx, setTimestampIdx] = useState<number>(0);
     const [infoMode, setInfoMode] = useState<number>(0);
-    const nTopic = 5;
 
     const _inArray = (item: any, arr: any[]) => {
         for (let i of arr) {
@@ -99,12 +98,8 @@ const ShowDTM = (props: ShowDTMProps) => {
     };
 
     useEffect(() => {
-        if (infoMode == 0) {
-            setOriginalReviewList([]);
-            handleOriginalReview();
-        } else {
-            handleGetTrend();
-        }
+        setOriginalReviewList([]);
+        handleOriginalReview();
     }, [chosenWord, infoMode]);
 
     const changeInfoMode = async (num: number) => {
@@ -129,7 +124,7 @@ const ShowDTM = (props: ShowDTMProps) => {
                     ) : (
                         <TopicPerMonth
                             month={monthList[timestampIdx]}
-                            topicObj={dtmTopicData}
+                            topicObj={dtmTopicData!}
                             onChange={changeChosenWord}
                             chosenWord={chosenWord}
                             chosenTopic={chosenTopic}
