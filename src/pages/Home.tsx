@@ -3,6 +3,9 @@ import styled from 'styled-components';
 import NavBar from '../components/NavBar';
 import { startAnalysis, crawlProductBasicInfo } from '../api/api.ts';
 import { ProductPreview } from '../model/commonResponse.ts';
+import useInput from '../hooks/useInput.ts';
+import ProductProfile from '../components/ProductProfile/';
+import WordSelector from '../components/WordSelector/';
 
 const enum LOAD_CHECK {
     INIT,
@@ -12,23 +15,23 @@ const enum LOAD_CHECK {
 };
 
 const Home = () => {
-    const [url, setUrl] = useState<string>('');
-    const [productName, setProductName] = useState<string>('');
-    const [category, setCategory] = useState<string>('');
-    const [projectName, setProjectName] = useState<string>('');
     const [productBasicInfo, setProductBasicInfo] = useState<ProductPreview>();
     const [chosenKeywordIdx, setChosenKeywordIdx] = useState<number>(-1);
     const [chosenCategoryIdx, setChosenCategoryIdx] = useState<number>(-1);
     const [loadingStatus, setLoadingStatus] = useState<LOAD_CHECK>(LOAD_CHECK.INIT);
 
-    const onChangeUrl = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const projectNameInput = useInput('');
+    const productNameInput = useInput('');
+    const categoryInput = useInput('');
+
+    const onChangeUrl = async (url: string) => {
         setLoadingStatus(LOAD_CHECK.LOADING);
-        if (e.target.value === '') {
+        if (url === '') {
             setLoadingStatus(LOAD_CHECK.INIT);
         }
-        setUrl(e.target.value);
+
         try {
-            const data = await crawlProductBasicInfo(e.target.value);
+            const data = await crawlProductBasicInfo(url);
             setProductBasicInfo(data);
             console.log(data);
             setLoadingStatus(LOAD_CHECK.END);
@@ -39,20 +42,10 @@ const Home = () => {
         }
     };
 
-    const onChangeProductName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setProductName(e.target.value);
-    };
-
-    const onChangeCategory = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setCategory(e.target.value);
-    };
-
-    const onChangeProjectName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setProjectName(e.target.value);
-    };
+    const urlInput = useInput('', onChangeUrl);
 
     const handleStartAnalysis = async () => {
-        const data = await startAnalysis(url, projectName, productName, category);
+        const data = await startAnalysis(urlInput.value, projectNameInput.value, productNameInput.value, categoryInput.value);
         console.log(data);
         if (data.success) {
             alert('분석이 성공적으로 시작되었습니다.');
@@ -63,12 +56,12 @@ const Home = () => {
 
     const changeChosenKeywordIdx = (idx: number, word: string) => {
         setChosenKeywordIdx(idx);
-        setProductName(word);
+        productNameInput.changeValue(word);
     };
 
     const changeChosenCategoryIdx = (idx: number, word: string) => {
         setChosenCategoryIdx(idx);
-        setCategory(word);
+        categoryInput.changeValue(word);
     };
 
     return (
@@ -86,41 +79,22 @@ const Home = () => {
                         <SmallList>현재 여러 사정으로 새로운 상품을 분석하기는 어렵습니다.(네이버 쇼핑 크롤링 방지 방안 강화/상세 path 변경/현재 AI 모델을 서빙할 수준의 서버 구축 어려움)</SmallList>
                     </ul>
                     <WhiteContainer>
-                        <LinkInput onChange={onChangeUrl} value={url} placeholder="링크 입력" />
+                        <LinkInput onChange={urlInput.onChange} value={urlInput.value} placeholder="링크 입력" />
                         {loadingStatus === LOAD_CHECK.END ? (
                             <ProductInfoWrapper
                                 available={productBasicInfo !== undefined}
                             >
-                                <div style={{ display: 'flex' }}>
-                                    <ProductImg src={productBasicInfo!.img_url} />
-                                    <div>
-                                        <ProductName>{productBasicInfo!.product_name}</ProductName>
-                                        <ProductName>
-                                            리뷰 개수: {productBasicInfo!.review_cnt}개{' '}
-                                            <span style={{ fontSize: '1rem' }}>
-                                                (최대 20,000개까지 수집)
-                                            </span>
-                                        </ProductName>
-                                        {productBasicInfo!.review_cnt < 1000 ? (
-                                            <WarningText>
-                                                * 리뷰 개수가 부족하여 일부 분석 결과의 신뢰도가
-                                                떨어질 수 있습니다.{' '}
-                                            </WarningText>
-                                        ) : (
-                                            <></>
-                                        )}
-                                    </div>
-                                </div>
+                                <ProductProfile imgUrl={productBasicInfo!.img_url} productName={productBasicInfo!.product_name} reviewCount={productBasicInfo!.review_cnt} />
                                 <NameText>프로젝트 제목을 적어주세요</NameText>
                                 <NameInput
-                                    onChange={onChangeProjectName}
-                                    value={projectName}
+                                    onChange={projectNameInput.onChange}
+                                    value={projectNameInput.value}
                                     placeholder="프로젝트 이름"
                                 />
                                 <NameText>트렌드 파악에 활용될 상품 키워드를 적어주세요</NameText>
                                 <NameInput
-                                    onChange={onChangeProductName}
-                                    value={productName}
+                                    onChange={productNameInput.onChange}
+                                    value={productNameInput.value}
                                     placeholder="상품 이름"
                                 />
                                 <SmallText>추천 키워드</SmallText>
@@ -132,57 +106,37 @@ const Home = () => {
                                         whiteSpace: 'nowrap',
                                     }}
                                 >
-                                    {productBasicInfo !== undefined ? (
-                                        [
-                                            productBasicInfo.model_name,
-                                            ...productBasicInfo.word_list,
-                                        ].map((word, idx) => {
-                                            if (word != undefined) {
-                                                return (
-                                                    <WordContainer
-                                                        key={idx}
-                                                        chosen={idx === chosenKeywordIdx}
-                                                        onClick={() =>
-                                                            changeChosenKeywordIdx(idx, word)
-                                                        }
-                                                    >
-                                                        {word}
-                                                    </WordContainer>
-                                                );
-                                            } else return <></>;
-                                        })
-                                    ) : (
-                                        <></>
-                                    )}
+                                    {
+                                        productBasicInfo !== undefined &&
+                                        <WordSelector 
+                                            wordList={[
+                                                productBasicInfo.model_name,
+                                                ...productBasicInfo.word_list,
+                                            ]}
+                                            chosenIdx={chosenKeywordIdx}
+                                            onChangeChosenWord={changeChosenKeywordIdx}
+                                        />
+                                    }
                                 </div>
                                 <NameText>트렌드 파악에 활용될 2차 키워드를 적어주세요</NameText>
                                 <NameInput
-                                    onChange={onChangeCategory}
-                                    value={category}
+                                    onChange={categoryInput.onChange}
+                                    value={categoryInput.value}
                                     placeholder="2차 키워드"
                                 />
                                 <SmallText>추천 키워드(카테고리/브랜드 추천)</SmallText>
                                 <div style={{ display: 'flex', overflowX: 'auto' }}>
-                                    {productBasicInfo !== undefined ? (
-                                        [
-                                            productBasicInfo.brand_name,
-                                            ...productBasicInfo.category_list,
-                                        ].map((word, idx) => {
-                                            return (
-                                                <WordContainer
-                                                    key={idx}
-                                                    chosen={idx === chosenCategoryIdx}
-                                                    onClick={() =>
-                                                        changeChosenCategoryIdx(idx, word)
-                                                    }
-                                                >
-                                                    {word}
-                                                </WordContainer>
-                                            );
-                                        })
-                                    ) : (
-                                        <></>
-                                    )}
+                                    {
+                                        productBasicInfo !== undefined &&
+                                        <WordSelector 
+                                            wordList={[
+                                                productBasicInfo.brand_name,
+                                                ...productBasicInfo.category_list,
+                                            ]}
+                                            chosenIdx={chosenCategoryIdx}
+                                            onChangeChosenWord={changeChosenCategoryIdx}
+                                        />
+                                    }
                                 </div>
                                 <StartBtn
                                     available={true}
@@ -304,35 +258,6 @@ const ProductInfoWrapper = styled.div<{available: boolean}>`
     width: 90%;
     margin-left: 5%;
     margin-top: 20px;
-`;
-
-const ProductImg = styled.img`
-    width: 200px;
-    height: 200px;
-`;
-
-const ProductName = styled.div`
-    font-size: 1.5rem;
-    font-weight: bold;
-    margin-left: 10px;
-`;
-
-const WarningText = styled.div`
-    font-size: 1rem;
-    color: rgba(255, 0, 0, 0.5);
-    margin-left: 10px;
-`;
-
-const WordContainer = styled.div<{chosen: boolean}>`
-    padding: 10px;
-    border-radius: 10px;
-    margin-bottom: 5px;
-    /* line-height: 18px; */
-    margin-top: 5px;
-    background-color: ${(props) => (props.chosen ? 'rgba(0, 0, 0, 0.1)' : '#FFFFFF')};
-    margin-right: 10px;
-    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.2);
-    font-size: min(1vw, 1rem);
 `;
 
 const Loading = styled.div`

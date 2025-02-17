@@ -1,68 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router';
 import styled from 'styled-components';
 import NavBar from '../components/NavBar/NavBar';
 import ShowBasicTopics from '../components/ShowBasicTopics/ShowBasicTopics';
 import ShowDTM from '../components/ShowDTM/ShowDTM';
-import { getAnalysisResult, downloadCsv } from '../api/api';
-import TrendChart from '../components/TrendChart/TrendChart';
-import { DTMItemMonth } from '../model/commonResponse';
+import { downloadCsv } from '../api/api';
 import Checkbox from '@mui/material/Checkbox';
+import GraphContainer from '../components/GraphContainer/GraphContainer';
+import useAnalysisInfo from '../hooks/useAnalysisInfo';
 
 const Analysis = () => {
     const params = useParams();
 
-    const [productName, setProductName] = useState<string>('');
-    const [filename, setFilename] = useState<string>('');
-    const [pros, setPros] = useState<string[][]>([]);
-    const [cons, setCons] = useState<string[][]>([]);
-    const [dtm, setDtm] = useState<DTMItemMonth[]>([]);
-    const [trend, setTrend] = useState<number[][]>([[-1]]);
-    const [dateList, setDateList] = useState<string[]>([]);
-    const [trendWarning, setTrendWarning] = useState<boolean>(false);
+    const {productInfo, dateList} = useAnalysisInfo(params.productid!);
     const [forecastCheck, setForecastCheck] = useState<boolean>(false);
 
-    const handleGetAnalysusResult = async () => {
-        try {
-            const data = await getAnalysisResult(params.productid!);
 
-            setProductName(data.p_data.product_name);
-            setFilename(data.p_data.csvname);
-            setPros(data.p_data.pros);
-            setCons(data.p_data.cons);
-            setTrend([data.p_data.trend, data.decomposed_trend, data.decomposed_seasonal]);
-            setTrendWarning(data.p_data.trend_warning);
-            setDtm(data.dtm_result);
-
-            const startDateStr = data.p_data.trend_start_date;
-            const startDate = new Date(
-                Number(startDateStr.slice(0, 4)),
-                Number(startDateStr.slice(4, 6)),
-                Number(startDateStr.slice(6, 8))
-            );
-
-            let dateListTemp = [];
-            let i = 0;
-            while (i < data.p_data.trend.length) {
-                dateListTemp.push(
-                    `${startDate.getFullYear()}. ${
-                        startDate.getMonth() + 1
-                    }. ${startDate.getDate()}.`
-                );
-                startDate.setDate(startDate.getDate() + 7);
-                i += 1;
-            }
-            setDateList(dateListTemp);
-        } catch (err) {
-            console.log(err);
-        }
-    };
-
-    useEffect(() => {
-        handleGetAnalysusResult();
-    }, []);
-
-    const handleDownload = async () => {
+    const handleDownload = async (filename: string) => {
         console.log(filename);
         const fileObjectUrl = await downloadCsv(filename);
         if (fileObjectUrl == null) {
@@ -81,18 +35,17 @@ const Analysis = () => {
 
     const handleForecastCheck = () => {
         setForecastCheck(!forecastCheck);
-        console.log(forecastCheck);
     };
 
     return (
         <>
-            <FullWrapper>
+                <FullWrapper>
                 <NavBar chosenIdx={1} />
                 <LeftContainer>
-                    <TitleText>'{productName}' 상품의 분석 결과입니다.</TitleText>
-                    <DownloadBtn onClick={handleDownload}>데이터 다운로드 (.csv)</DownloadBtn>
-                    <ShowBasicTopics prosList={pros} consList={cons} />
-                    <ShowDTM productID={params.productid!} dtmResult={dtm} />
+                    <TitleText>'{productInfo?.p_data.product_name}' 상품의 분석 결과입니다.</TitleText>
+                    <DownloadBtn onClick={() => handleDownload(productInfo?.p_data.csvname!)}>데이터 다운로드 (.csv)</DownloadBtn>
+                    <ShowBasicTopics prosList={productInfo?.p_data.pros!} consList={productInfo?.p_data.cons!} />
+                    <ShowDTM productID={params.productid!} dtmResult={productInfo?.dtm_result!} />
                     <GraphWrapper>
                         <GraphText>트렌드 예측 그래프</GraphText>
                         <div
@@ -105,14 +58,10 @@ const Analysis = () => {
                             <div>트렌드 예측 결과 포함</div>
                             <Checkbox checked={forecastCheck} onChange={handleForecastCheck} />
                         </div>
-                        {trendWarning ? (
-                            <SmallLoadingText>
-                                ※ 지난 3개년 간의 검색량이 부족하여 예측의 정확도가 매우 낮을 수
-                                있습니다.
-                            </SmallLoadingText>
-                        ) : (
-                            <></>
-                        )}
+                        {productInfo?.p_data.trend_warning && <SmallLoadingText>
+                            ※ 지난 3개년 간의 검색량이 부족하여 예측의 정확도가 매우 낮을 수
+                            있습니다.
+                        </SmallLoadingText>}
                         <div
                             style={{
                                 width: '100%',
@@ -121,18 +70,7 @@ const Analysis = () => {
                                 height: '80%',
                             }}
                         >
-                            {trend.length == 0 ? (
-                                <LoadingText>로딩중...</LoadingText>
-                            ) : trend[0][0] === -1 ? (
-                                <LoadingText>트렌드 예측이 수행되지 않았습니다.</LoadingText>
-                            ) : (
-                                <TrendChart
-                                    frequency={trend}
-                                    x={dateList}
-                                    label="검색량 추이"
-                                    forecastCheck={forecastCheck}
-                                />
-                            )}
+                            <GraphContainer trend={[productInfo?.p_data.trend!, productInfo?.decomposed_trend!, productInfo?.decomposed_seasonal!]} dateList={dateList} forecastCheck={forecastCheck} />
                         </div>
                     </GraphWrapper>
                 </LeftContainer>
@@ -189,16 +127,6 @@ const GraphWrapper = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-`;
-
-const LoadingText = styled.div`
-    width: 100%;
-    height: 240px;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: rgba(0, 0, 0, 0.5);
-    text-align: center;
-    line-height: 240px;
 `;
 
 const SmallLoadingText = styled.div`

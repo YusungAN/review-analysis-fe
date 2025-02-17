@@ -16,7 +16,7 @@ const TopicPerMonth = (props: TopicPerMonthProps) => {
             <MonthWrapper>
                 <MonthTitle>{month}</MonthTitle>
                 <KeywordsWrapper>
-                    {month !== undefined ? (
+                    {month !== undefined && (
                         topicObj[month].map((words: string, idx: number) => {
                             return (
                                 <KeywordElement key={idx}>
@@ -44,8 +44,6 @@ const TopicPerMonth = (props: TopicPerMonthProps) => {
                                 </KeywordElement>
                             );
                         })
-                    ) : (
-                        <></>
                     )}
                 </KeywordsWrapper>
             </MonthWrapper>

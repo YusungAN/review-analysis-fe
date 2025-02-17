@@ -53,10 +53,6 @@ const ShowDTM = (props: ShowDTMProps) => {
         setMonthList(tempMonthList);
     };
 
-    useEffect(() => {
-        getTopicPerMonthData();
-    }, [dtmResult]);
-
     const nextPage = () => {
         if (nowSentPage+1 >= Math.ceil(originalReviewList.length/5)) {
             return;
@@ -101,6 +97,10 @@ const ShowDTM = (props: ShowDTMProps) => {
         setOriginalReviewList([]);
         handleOriginalReview();
     }, [chosenWord, infoMode]);
+
+    useEffect(() => {
+        getTopicPerMonthData();
+    }, [dtmResult]);
 
     const changeInfoMode = async (num: number) => {
         if (infoMode == num) return;

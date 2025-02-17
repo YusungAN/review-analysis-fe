@@ -11,7 +11,7 @@ const List = () => {
 
     const { status, update } = useProcessStore();
 
-    const [projectList, setProjectList] = useState<ProjectListItem[]>([]);
+    const [projectList, setProjectList] = useState<ProjectListItem[] | undefined>(undefined);
     const [updateSec, setUpdateSec] = useState<number>(0);
 
     const messages = [
@@ -64,7 +64,7 @@ const List = () => {
                             <ProjectName>프로젝트 이름</ProjectName>
                         </TableTitleWrapper>
                         {projectList == undefined ? (
-                            <LoadingText />
+                            <LoadingText>로딩중..</LoadingText>
                         ) : (
                             projectList.map((info, idx) => {
                                 return (
@@ -149,12 +149,12 @@ const WhiteContainer = styled.div`
 
 const LoadingText = styled.div`
     width: 100%;
-    height: 370px;
+    height: 50px;
     font-size: 1.2rem;
     font-weight: bold;
-    color: #f9f9f9;
+    color:rgb(125, 125, 125);
     text-align: center;
-    line-height: 370px;
+    line-height: 50px;
 `;
 
 const TableTitleWrapper = styled.div`
